@@ -1,0 +1,7 @@
+{% extends 'default.html' %} {% load censor %} {% block content %}
+<h1>{{ post.title|censor }}</h1>
+<p>Дата публикации: {{ post.created_at|date:"d.m.Y" }}</p>
+<p>{{ post.text|censor }}</p>
+<p><a href="{% url 'edit_post' pk=post.pk %}">Редактировать</a></p>
+<p><a href="{% url 'delete_post' pk=post.pk %}">Удалить</a></p>
+{% endblock %}
