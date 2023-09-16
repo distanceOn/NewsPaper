@@ -1,6 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Sum
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import Q
+from django.db.models.signals import post_migrate
+from django.dispatch import receiver
+from django.contrib.auth.models import Group
 
 
 class Author(models.Model):
@@ -74,3 +80,24 @@ class Comment(models.Model):
     def dislike(self):
         self.rating -= 1
         self.save()
+
+
+@receiver(post_migrate)
+def add_permissions(sender, **kwargs):
+    content_type = ContentType.objects.get_for_model(Post)
+
+    # Создаем права для создания и редактирования постов
+    add_permission = Permission.objects.get(
+        codename='add_post',
+        content_type=content_type,
+    )
+    change_permission = Permission.objects.get(
+        codename='change_post',
+        content_type=content_type,
+    )
+
+    # Получаем или создаем группу "authors"
+    authors_group, created = Group.objects.get_or_create(name='authors')
+
+    # Добавляем права к группе "authors"
+    authors_group.permissions.add(add_permission, change_permission)

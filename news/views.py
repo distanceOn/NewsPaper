@@ -7,6 +7,7 @@ from django.views.generic import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
+from .mixins import AuthorPermissionMixin
 
 
 def news_list(request):
@@ -58,18 +59,18 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class AuthenticatedMixin(LoginRequiredMixin):
+class AuthenticatedMixin(LoginRequiredMixin, AuthorPermissionMixin):
     login_url = '/accounts/login/'
 
 
-class PostUpdateView(LoginRequiredMixin, UpdateView):
+class PostUpdateView(LoginRequiredMixin, AuthorPermissionMixin, UpdateView):
     model = Post
     form_class = PostForm
     template_name = 'news/edit_post.html'
     success_url = reverse_lazy('news_list')
 
 
-class PostDeleteView(DeleteView):
+class PostDeleteView(LoginRequiredMixin, AuthorPermissionMixin,DeleteView):
     model = Post
     template_name = 'news/delete_post.html'
     success_url = reverse_lazy('news_list')
