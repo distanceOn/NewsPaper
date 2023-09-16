@@ -8,6 +8,7 @@
 	{% for post in posts %}
 	<li>
 		<h2>{{ post.title }}</h2>
+		<p>Автор: {{post.author.user.username}}</p>
 		<p>Дата публикации: {{ post.created_at|date:"d.m.Y" }}</p>
 		<p>{{ post.text|truncatewords:20 }}</p>
 		<a href="{% url 'news_detail' post.id %}">Читать дальше</a>

@@ -4,6 +4,12 @@
 	</head>
 	<body>
 		<header>
+			{% if user.is_authenticated %} Добро пожаловать, {{ user.username }}!
+			<!-- Или вы можете использовать user.get_full_name(), если хотите отобразить полное имя пользователя -->
+			<a href="{% url 'account_logout' %}">Выход</a>
+			{% else %}
+			<a href="{% url 'account_login' %}">Войти</a>
+			{% endif %}
 			<!-- Заголовок и навигация -->
 		</header>
 		<main>{% block content %} {% endblock %}</main>

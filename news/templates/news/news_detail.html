@@ -2,6 +2,10 @@
 <h1>{{ post.title|censor }}</h1>
 <p>Дата публикации: {{ post.created_at|date:"d.m.Y" }}</p>
 <p>{{ post.text|censor }}</p>
+{% if user.is_authenticated and user == post.author.user %}
 <p><a href="{% url 'edit_post' pk=post.pk %}">Редактировать</a></p>
 <p><a href="{% url 'delete_post' pk=post.pk %}">Удалить</a></p>
+
+{% endif %}
+<p><a href="{% url 'news_list' %}">Назад к списку новостей</a></p>
 {% endblock %}

@@ -4,4 +4,5 @@
 	{% csrf_token %} {{ form.as_p }}
 	<button type="submit">Create</button>
 </form>
+<p><a href="{% url 'news_list' %}">Назад к списку новостей</a></p>
 {% endblock %}

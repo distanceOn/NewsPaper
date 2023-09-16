@@ -5,6 +5,7 @@ from django.core.paginator import Paginator
 from django.contrib.auth.models import User
 from django.views.generic import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 def news_list(request):
@@ -40,7 +41,7 @@ def news_search(request):
     return render(request, 'news/news_search.html', {'form': form, 'page': page})
 
 
-class PostCreateView(CreateView):
+class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
     form_class = PostForm
     template_name = 'news/add_post.html'
@@ -48,24 +49,26 @@ class PostCreateView(CreateView):
 
     def form_valid(self, form):
         if self.request.user.is_authenticated:
-            form.instance.author = self.request.user.author
+            author, created = Author.objects.get_or_create(
+                user=self.request.user)
+            form.instance.author = author
         else:
-            # Создаем "Неизвестного автора" или используйте дефолтного автора
-            unknown_author, created = Author.objects.get_or_create(
-                user=User.objects.get(username="Unknown"))
-            form.instance.author = unknown_author
+            form.instance.author = None
         return super().form_valid(form)
 
 
-class PostUpdateView(UpdateView):
+class AuthenticatedMixin(LoginRequiredMixin):
+    login_url = '/accounts/login/'
+
+
+class PostUpdateView(LoginRequiredMixin, UpdateView):
     model = Post
     form_class = PostForm
-    template_name = 'news/edit_post.html'  # Создайте этот шаблон
-    # После успешного обновления перенаправляем на список новостей
+    template_name = 'news/edit_post.html'
     success_url = reverse_lazy('news_list')
 
 
 class PostDeleteView(DeleteView):
     model = Post
-    template_name = 'news/delete_post.html'  # Создайте этот шаблон
+    template_name = 'news/delete_post.html'
     success_url = reverse_lazy('news_list')
