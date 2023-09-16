@@ -1,8 +1,15 @@
-{% extends 'default.html' %} {% block content %}
+{% extends 'default.html' %} {% load auth_extras %}
+<!--fdfsdf-->
+
+<!--fdfsdf-->
+{% block content %}
 <h1>Список новостей</h1>
 <p>Всего новостей: {{ posts|length }}</p>
 <!-- Вставляем ссылку на страницу создания новости -->
+{% if request.user|has_group:"authors" %}
 <p><a href="{% url 'add_post' %}">Создать новость</a></p>
+{% endif %}
+
 <p><a href="{% url 'news_search' %}">Поиск</a></p>
 <ul>
 	{% for post in posts %}

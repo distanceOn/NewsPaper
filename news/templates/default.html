@@ -1,3 +1,7 @@
+{% load static %}
+<!--dsadsa -->
+{% load auth_extras %}
+
 <html>
 	<head>
 		<!-- Мета-теги и другие элементы head -->
@@ -6,11 +10,15 @@
 		<header>
 			{% if user.is_authenticated %} Добро пожаловать, {{ user.username }}!
 			<!-- Или вы можете использовать user.get_full_name(), если хотите отобразить полное имя пользователя -->
+			{% if request.user|has_group:"authors" %}
+			<p>Автор {% else %}</p>
+
+			<a href="{% url 'become_author' %}">Стать автором</a>
+			{% endif %}
 			<a href="{% url 'account_logout' %}">Выход</a>
 			{% else %}
 			<a href="{% url 'account_login' %}">Войти</a>
 			{% endif %}
-			<!-- Заголовок и навигация -->
 		</header>
 		<main>{% block content %} {% endblock %}</main>
 		<footer>

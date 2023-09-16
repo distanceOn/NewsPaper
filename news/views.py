@@ -2,10 +2,11 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import Author, Post
 from .forms import SearchForm, PostForm
 from django.core.paginator import Paginator
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Group
 from django.views.generic import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 
 
 def news_list(request):
@@ -72,3 +73,10 @@ class PostDeleteView(DeleteView):
     model = Post
     template_name = 'news/delete_post.html'
     success_url = reverse_lazy('news_list')
+
+
+@login_required
+def become_author(request):
+    authors_group, created = Group.objects.get_or_create(name='authors')
+    request.user.groups.add(authors_group)
+    return redirect('/news/')  # Перенаправьте пользователя на страницу профиля или куда угодно еще

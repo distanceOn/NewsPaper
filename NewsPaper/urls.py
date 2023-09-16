@@ -29,5 +29,7 @@ urlpatterns = [
     path('news/<int:pk>/edit/', views.PostUpdateView.as_view(), name='edit_post'),
     path('news/<int:pk>/delete/', views.PostDeleteView.as_view(), name='delete_post'),
     path('accounts/', include('allauth.urls')),
+    path('become_author/', views.become_author, name='become_author'),
+
 
 ]
