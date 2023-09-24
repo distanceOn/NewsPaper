@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+
 from .models import Author, Post, Category
 from .forms import SearchForm, PostForm
 from django.core.paginator import Paginator
@@ -9,7 +10,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from .mixins import AuthorPermissionMixin
 from .models import Category
-from django.core.mail import EmailMultiAlternatives
+from django.core.mail import EmailMultiAlternatives, EmailMessage
 from django.template.loader import render_to_string
 
 
@@ -87,6 +88,8 @@ class PostDeleteView(LoginRequiredMixin, AuthorPermissionMixin,DeleteView):
     model = Post
     template_name = 'news/delete_post.html'
     success_url = reverse_lazy('news_list')
+
+
 
 
 
