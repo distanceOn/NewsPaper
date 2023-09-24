@@ -10,12 +10,36 @@
 <p><a href="{% url 'add_post' %}">Создать новость</a></p>
 {% endif %}
 
+<div>
+	<h3>Все категории:</h3>
+    <ul>
+        {% for category in categories %}
+            <li>
+                
+                    {{ category.name }}
+                    {% if user.is_authenticated %}
+                        {% if user in category.subscribers.all %}
+												<a href="{% url 'unsubscribe_category' category.id %}">
+                            (Отписаться)</a>
+                        {% else %}
+												<a href="{% url 'subscribe_category' category.id %}">
+                            (Подписаться)</a>
+                        {% endif %}
+                    {% endif %}
+                
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+
+
 <p><a href="{% url 'news_search' %}">Поиск</a></p>
 <ul>
 	{% for post in posts %}
 	<li>
 		<h2>{{ post.title }}</h2>
 		<p>Автор: {{post.author.user.username}}</p>
+		<p>Категория: {{post.postcategory_set.first.category}}</p>
 		<p>Дата публикации: {{ post.created_at|date:"d.m.Y" }}</p>
 		<p>{{ post.text|truncatewords:20 }}</p>
 		<a href="{% url 'news_detail' post.id %}">Читать дальше</a>

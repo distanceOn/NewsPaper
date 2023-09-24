@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Author, Post
+from .models import Author, Post, Category
 from .forms import SearchForm, PostForm
 from django.core.paginator import Paginator
 from django.contrib.auth.models import Group
@@ -8,11 +8,15 @@ from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from .mixins import AuthorPermissionMixin
+from .models import Category
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 
 
 def news_list(request):
     posts = Post.objects.order_by('-created_at')
-    return render(request, 'news/news_list.html', {'posts': posts})
+    categories = Category.objects.all()
+    return render(request, 'news/news_list.html', {'posts': posts, 'categories': categories})
 
 
 def news_detail(request, id):
@@ -56,7 +60,16 @@ class PostCreateView(LoginRequiredMixin, CreateView):
             form.instance.author = author
         else:
             form.instance.author = None
-        return super().form_valid(form)
+
+        # Сохраняем пост
+        response = super().form_valid(form)
+
+        # Отправляем уведомление о создании поста подписчикам категории
+        if form.cleaned_data.get('categories'):
+            for category in form.cleaned_data['categories']:
+                send_newsletter_notification(category, self.object)
+
+        return response
 
 
 class AuthenticatedMixin(LoginRequiredMixin, AuthorPermissionMixin):
@@ -76,8 +89,51 @@ class PostDeleteView(LoginRequiredMixin, AuthorPermissionMixin,DeleteView):
     success_url = reverse_lazy('news_list')
 
 
+
+
+
 @login_required
 def become_author(request):
     authors_group, created = Group.objects.get_or_create(name='authors')
     request.user.groups.add(authors_group)
-    return redirect('/news/')  # Перенаправьте пользователя на страницу профиля или куда угодно еще
+    return redirect('/news/')  
+
+
+def subscribe_category(request, category_id):
+    category = Category.objects.get(pk=category_id)
+    user = request.user
+
+    if user not in category.subscribers.all():
+        category.subscribers.add(user)
+
+    return redirect('news_list')
+
+def unsubscribe_category(request, category_id):
+    category = Category.objects.get(pk=category_id)
+    user = request.user
+
+    if user in category.subscribers.all():
+        category.subscribers.remove(user)
+
+    return redirect('news_list')
+
+def send_newsletter_notification(category, post):
+    subscribers = category.subscribers.all()
+
+    for user in subscribers:
+        subject = post.title if post else "Новая статья в твоём любимом разделе!"
+        
+        # Рендерим HTML-содержимое из шаблона
+        html_content = render_to_string('news/newsletter.html', {'post': post, 'user': user})
+
+        # Создаем EmailMultiAlternatives объект
+        msg = EmailMultiAlternatives(
+            subject=subject,
+            body='',  # Вы можете оставить body пустым, так как у нас есть HTML-содержимое
+            from_email='distanceOn@yandex.ru',
+            to=[user.email],
+        )
+        msg.attach_alternative(html_content, "text/html")  # Добавляем HTML-содержимое
+
+        # Отправляем письмо
+        msg.send()

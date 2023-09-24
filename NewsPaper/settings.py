@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -141,7 +145,7 @@ SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'APP': {
             'client_id': '478216630280-diij92pblbbq932rd1i8l18psr6j8dd2.apps.googleusercontent.com',
-            'secret': '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',
+            'secret': os.getenv('SECRET_KEY'),
             'key': '',
         },
         'SCOPE': [
@@ -157,3 +161,15 @@ SOCIALACCOUNT_PROVIDERS = {
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = 'news_list'
 LOGOUT_REDIRECT_URL = 'news_list'
+
+
+
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True

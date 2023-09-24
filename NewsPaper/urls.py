@@ -30,6 +30,8 @@ urlpatterns = [
     path('news/<int:pk>/delete/', views.PostDeleteView.as_view(), name='delete_post'),
     path('accounts/', include('allauth.urls')),
     path('become_author/', views.become_author, name='become_author'),
+    path('subscribe_category/<int:category_id>/', views.subscribe_category, name='subscribe_category'),
+    path('unsubscribe_category/<int:category_id>/', views.unsubscribe_category, name='unsubscribe_category'),
 
 
 ]
