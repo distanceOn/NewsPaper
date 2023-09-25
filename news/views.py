@@ -13,14 +13,16 @@ from .mixins import AuthorPermissionMixin
 from .models import Category
 from django.core.mail import EmailMultiAlternatives, EmailMessage
 from django.template.loader import render_to_string
+from django.views.decorators.cache import cache_page
 
 
+@cache_page(60 * 5)
 def news_list(request):
     posts = Post.objects.order_by('-created_at')
     categories = Category.objects.all()
     return render(request, 'news/news_list.html', {'posts': posts, 'categories': categories})
 
-
+@cache_page(60 * 60)
 def news_detail(request, id):
     post = get_object_or_404(Post, id=id)
     return render(request, 'news/news_detail.html', {'post': post})
