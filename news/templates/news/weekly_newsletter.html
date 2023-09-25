@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Еженедельная рассылка</title>
+</head>
+<body>
+    <h1>Еженедельная рассылка новых статей</h1>
+    <p>Привет, уважаемый подписчик!</p>
+    <p>Вот список новых статей, добавленных за прошедшую неделю в разделе, на который вы подписаны:</p>
+    <ul>
+        {% for post in new_posts %}
+            <li>
+                <h2>{{ post.title }}</h2>
+                <p>{{ post.preview }}</p>
+                <p><a href="{{ post.get_absolute_url }}">Читать далее</a></p>
+            </li>
+        {% endfor %}
+    </ul>
+    <p>Спасибо, что остаетесь с нами!</p>
+</body>
+</html>

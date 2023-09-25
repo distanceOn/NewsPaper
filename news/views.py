@@ -149,7 +149,7 @@ def send_newsletter_notification(category, post):
         # Создаем EmailMultiAlternatives объект
         msg = EmailMultiAlternatives(
             subject=subject,
-            body='',  # Вы можете оставить body пустым, так как у нас есть HTML-содержимое
+            body='',  
             from_email='distanceOn@yandex.ru',
             to=[user.email],
         )
