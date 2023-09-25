@@ -1,5 +1,6 @@
+from django.http import HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404, redirect
-
+from django.utils import timezone
 from .models import Author, Post, Category
 from .forms import SearchForm, PostForm
 from django.core.paginator import Paginator
@@ -56,21 +57,37 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         if self.request.user.is_authenticated:
-            author, created = Author.objects.get_or_create(
-                user=self.request.user)
+            # Получаем экземпляр Author для текущего пользователя
+            author, created = Author.objects.get_or_create(user=self.request.user)
+
+            # Определяем начало текущих суток
+            start_of_day = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+
+            # Подсчитываем количество новостей пользователя за текущие сутки
+            news_count = Post.objects.filter(
+                author=author, created_at__gte=start_of_day
+            ).count()
+
+            # Устанавливаем максимальное количество новостей в сутки
+            max_news_per_day = 3
+
+            if news_count >= max_news_per_day:
+                return HttpResponseBadRequest('Вы достигли лимита публикации новостей в сутки.')
+
+            # Если пользователь не достиг лимита, публикуем новость
             form.instance.author = author
+
+            # Сохраняем пост
+            response = super().form_valid(form)
+
+            # Отправляем уведомление о создании поста подписчикам категории
+            if form.cleaned_data.get('categories'):
+                for category in form.cleaned_data['categories']:
+                    send_newsletter_notification(category, self.object)
+
+            return response
         else:
-            form.instance.author = None
-
-        # Сохраняем пост
-        response = super().form_valid(form)
-
-        # Отправляем уведомление о создании поста подписчикам категории
-        if form.cleaned_data.get('categories'):
-            for category in form.cleaned_data['categories']:
-                send_newsletter_notification(category, self.object)
-
-        return response
+            return HttpResponseBadRequest('Требуется аутентификация пользователя.')
 
 
 class AuthenticatedMixin(LoginRequiredMixin, AuthorPermissionMixin):
